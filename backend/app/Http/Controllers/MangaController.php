@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Manga;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class MangaController extends Controller
 {
@@ -14,7 +15,7 @@ class MangaController extends Controller
     public function index()
     {
         ///on veut récupérer la liste des mangas en DB et l'a retourner sous forme de JSON
-        $mangas = Manga::all();
+        $mangas = Manga::all()->load('category');
         //dd($mangas);
         return $mangas;
     }
@@ -61,7 +62,7 @@ class MangaController extends Controller
     public function show(string $id)
     {
         //on veut récupérer un mangas particulier selon son ID sous forme de JSON
-        return Manga::findOrFail($id);
+        return Manga::findOrFail($id)->load("category");
         //dd($id);
     }
 
@@ -70,7 +71,33 @@ class MangaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+         //faire une manip de validation en amont afin de vérifier que l'extraction des valeurs sont ok - utiliser le Rule si on veut regrouper la methode PUT et PATCH
+         $validator = Validator::make($request->all(), [
+            "name"  => [Rule::when($request->isMethod('patch'), "sometimes"), "required", "max:255", "string"],
+            "date_existence" => [Rule::when($request->isMethod('patch'), "sometimes"), "required", "date"],
+            "author" => [Rule::when($request->isMethod('patch'), "sometimes"), "required", "max:255", "string"],
+            "category_id" => [Rule::when($request->isMethod('patch'), "sometimes"), "integer", "exists:categories,id"],
+        ]);
+
+        if ($validator->fails()) {
+            // Si on est là, c'est qu'une règle de validation à bloqué
+            return response($validator->errors(), 422);
+        }
+
+        // On recherche avec l'id
+        $manga = Manga::findOrFail($id);
+
+        $manga->fill($request->only(["name", "date_existence", "author", "category_id"])); //LE RAJOUTER SUR LE MODEL NE PAS OUBLIER
+
+        // On sauvegarde, puis on gère la réponse avec le code HTTP qui convient
+        // 500 : Internal Server Error
+        if ($manga->save()) {
+            return $manga;
+        }
+
+        return response(null, 500);
+
+
     }
 
     /**
@@ -78,6 +105,15 @@ class MangaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // On recherche avec l'id
+        $manga = Manga::findOrFail($id);
+
+        // On supprime puis on gère la réponse avec le code HTTP qui convient
+        // 500 : Internal Server Error
+        if ($manga->delete()) {
+            return response(null, 204);
+        }
+
+        return response(null, 500);
     }
 }
