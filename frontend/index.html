@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Manager</title>
+    <meta name="description" content="Un gestionnaire des listes des mangas, pour vous aider à mettre à jour au quotidien">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Manga manager</h1>
+      </header>
+      <main>
+        <div class="create-manga-container">
+            <button id="add-manga-button">Nouveau manga</button>
+        </div>
+        <div class="message success" hidden>
+            Le nouveau manga a bien été ajouté
+        </div>
+        <div class="message danger" hidden>
+            Oops, impossible de sauvegarder le manga
+        </div>
+        <ul class="mangalist">
+        </ul>
+        <div id="manga-form-modal" class="modal-dialog">
+            <form id="manga-form">
+              <h2>Nouveau manga</h2>
+      
+              <input name="id" id="manga-id" type="hidden">
+      
+              <label for="manga-name" class="screen-reader-only">Nom du manga</label>
+              <input name="name" id="manga-name placeholder="Nom du manga..." type="text" required>
+
+              <label for="manga-date_existence" class="screen-reader-only">Date du manga</label>
+              <input name="date_existence" id="manga-date_existence placeholder="Date du manga..." type="text" required>
+
+              <label for="manga-author" class="screen-reader-only">Auteur du manga</label>
+              <input name="author" id="manga-author placeholder="Auteur du manga..." type="text" required>
+      
+              <label for="manga-category" class="screen-reader-only">Catégorie</label>
+              <select name="category_id" id="manga-category">
+                <option value="">Sans catégorie</option>
+                <!-- Il faut le compléter avec les catégories de la DB => il va falloir appeller une api GET /api/categories -->
+              </select>
+              <button>Ajouter</button>
+            </form>
+          </div>
+      </main>
+
+      <template id="manga-template">
+        <li data-id="" class="manga">
+          <p>
+            <em></em>
+          </p>
+          <div class="delete"></div>
+          <div class="edit"></div>
+        </li>
+      </template>
+    
+</body>
+</html>
